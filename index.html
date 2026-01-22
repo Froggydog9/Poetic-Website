@@ -32,31 +32,19 @@
       min-height:100vh;
     }
 
-    /* Fullscreen "single screen at a time" */
-    .screen{
-      display:none;
-      min-height:100vh;
-      padding: 18px 16px 28px;
-    }
+    /* Fullscreen: only one screen shown at a time */
+    .screen{display:none; min-height:100vh; padding: 18px 16px 28px;}
     .screen.active{display:block}
-
     .wrap{max-width:1100px;margin:0 auto}
 
-    .brand{
-      display:flex; align-items:center; gap:12px;
-      padding: 10px 0 6px;
-    }
+    .brand{display:flex; align-items:center; gap:12px; padding: 10px 0 6px;}
     .logo{
       width:48px; height:48px; border-radius:16px;
       background: linear-gradient(135deg, rgba(124,58,237,.9), rgba(34,197,94,.75));
       box-shadow: 0 10px 25px rgba(124,58,237,.25);
       flex:0 0 auto;
     }
-    h1{
-      margin:0;
-      font-size: clamp(22px, 3.2vw, 34px);
-      letter-spacing:.2px;
-    }
+    h1{margin:0; font-size: clamp(22px, 3.2vw, 34px); letter-spacing:.2px;}
     .subtitle{color:var(--muted); margin-top:4px; font-size:14px}
 
     .card{
@@ -75,11 +63,7 @@
       background: linear-gradient(180deg, rgba(255,255,255,.04), transparent);
       border-bottom:1px solid rgba(255,255,255,.06);
     }
-    .hd h2{
-      margin:0;
-      font-size: 16px;
-      letter-spacing:.2px;
-    }
+    .hd h2{margin:0; font-size: 16px; letter-spacing:.2px;}
     .bd{padding:16px}
 
     .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
@@ -99,26 +83,11 @@
     }
     button:hover{background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22)}
     button:active{transform: translateY(1px)}
-    button.primary{
-      border-color: rgba(124,58,237,.55);
-      background: rgba(124,58,237,.18);
-    }
-    button.good{
-      border-color: rgba(34,197,94,.55);
-      background: rgba(34,197,94,.14);
-    }
-    button.bad{
-      border-color: rgba(239,68,68,.55);
-      background: rgba(239,68,68,.14);
-    }
-    button.ghost{
-      background: transparent;
-    }
-    button:disabled{
-      opacity:.55;
-      cursor:not-allowed;
-      transform:none;
-    }
+    button.primary{border-color: rgba(124,58,237,.55); background: rgba(124,58,237,.18);}
+    button.good{border-color: rgba(34,197,94,.55); background: rgba(34,197,94,.14);}
+    button.bad{border-color: rgba(239,68,68,.55); background: rgba(239,68,68,.14);}
+    button.ghost{background: transparent;}
+    button:disabled{opacity:.55; cursor:not-allowed; transform:none;}
 
     .pill{
       display:inline-flex;
@@ -169,7 +138,8 @@
       flex: 0 0 auto;
       margin-top: 1px;
     }
-    .answerText{font-weight: 700}
+    /* REQUIRED: all answer choices appear capitalized */
+    .answers .answerText{font-weight: 800; text-transform: uppercase;}
 
     .feedback{
       margin-top:12px;
@@ -207,13 +177,14 @@
       white-space: pre-wrap;
     }
 
+    /* Results + Highscores */
     .kpis{
       display:grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap:10px;
       margin-top: 12px;
     }
-    @media (max-width: 720px){
+    @media (max-width: 820px){
       .kpis{grid-template-columns: 1fr}
     }
     .kpi{
@@ -224,6 +195,27 @@
     }
     .kpi .label{color:var(--muted); font-size:12px}
     .kpi .v{font-size: 22px; font-weight: 900; margin-top:4px}
+
+    table{
+      width:100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      overflow:hidden;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(15,23,48,.35);
+    }
+    th, td{
+      text-align:left;
+      padding: 10px 10px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      font-size: 13px;
+      color: rgba(238,242,255,.92);
+      vertical-align: top;
+    }
+    th{color: var(--muted); font-weight: 900; background: rgba(255,255,255,.03)}
+    tr:last-child td{border-bottom:none}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
   </style>
 </head>
 <body>
@@ -241,8 +233,8 @@
 
       <div class="card">
         <div class="hd">
-          <h2>Choose a Mode</h2>
-          <span class="pill">3 modes • 1 try per question</span>
+          <h2>Menu</h2>
+          <span class="pill">8 questions per mode</span>
         </div>
         <div class="bd">
           <div class="row">
@@ -250,12 +242,16 @@
             <button class="primary" id="btnStart2">Mode 2: Definition → Type</button>
             <button class="primary" id="btnStart3">Mode 3: Example → Type</button>
           </div>
+
           <div style="height:12px"></div>
+
           <div class="row">
             <button class="ghost" id="btnStudy">Study Guide</button>
+            <button class="ghost" id="btnHighscores">Highscores</button>
           </div>
+
           <div style="height:12px"></div>
-          <div class="pill" id="homeHint">Tip: Each mode uses every item once (8 questions).</div>
+          <div class="pill">Highscores are saved on this device (localStorage).</div>
         </div>
       </div>
     </div>
@@ -284,6 +280,33 @@
     </div>
   </section>
 
+  <!-- HIGHSCORES SCREEN -->
+  <section class="screen" id="screenHighscores">
+    <div class="wrap">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Highscores</h1>
+          <div class="subtitle">Sorted by most correct, then fastest time.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="hd">
+          <h2>All Attempts</h2>
+          <div class="row">
+            <button class="ghost" id="btnBackFromHighscores">Back</button>
+            <button class="bad" id="btnClearHighscores" title="Clears all saved attempts on this device">Clear</button>
+          </div>
+        </div>
+        <div class="bd">
+          <div class="pill" id="hsCount">—</div>
+          <div id="highscoreTableWrap"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- QUIZ SCREEN (FULLSCREEN MODE) -->
   <section class="screen" id="screenQuiz">
     <div class="wrap">
@@ -293,6 +316,7 @@
           <div class="row">
             <span class="pill" id="pillProgress">Question —</span>
             <span class="pill" id="pillScore">Score —</span>
+            <span class="pill mono" id="pillTime">Time 0:00</span>
           </div>
         </div>
         <div class="bd">
@@ -346,12 +370,17 @@
               <div class="label">Percentage</div>
               <div class="v" id="resPercent">0%</div>
             </div>
+            <div class="kpi">
+              <div class="label">Time</div>
+              <div class="v mono" id="resTime">0:00</div>
+            </div>
           </div>
 
           <div style="height:14px"></div>
           <div class="row">
             <button class="primary" id="btnBackToHome">Back to Menu</button>
-            <button class="ghost" id="btnReviewStudy">Open Study Guide</button>
+            <button class="ghost" id="btnReviewStudy">Study Guide</button>
+            <button class="ghost" id="btnGoHighscores">Highscores</button>
           </div>
         </div>
       </div>
@@ -385,7 +414,7 @@
         .replaceAll("'","&#039;");
     }
 
-    // Convert *word* to <em>word</em> (italic)
+    // Convert *word* to <em>word</em> (italic). (We keep your *like* / *as* behavior.)
     function italicizeStars(str){
       const raw = String(str);
       const parts = raw.split("*");
@@ -414,6 +443,17 @@
       return shuffle(idxs).slice(0, n);
     }
 
+    function formatTime(ms){
+      const totalSec = Math.floor(ms / 1000);
+      const m = Math.floor(totalSec / 60);
+      const s = totalSec % 60;
+      return m + ":" + String(s).padStart(2, "0");
+    }
+
+    function nowISO(){
+      return new Date().toISOString();
+    }
+
     // ===========
     // SCREENS
     // ===========
@@ -421,15 +461,16 @@
     const screenStudy = document.getElementById("screenStudy");
     const screenQuiz = document.getElementById("screenQuiz");
     const screenResults = document.getElementById("screenResults");
+    const screenHighscores = document.getElementById("screenHighscores");
 
     function showScreen(screenEl){
-      [screenHome, screenStudy, screenQuiz, screenResults].forEach(s => s.classList.remove("active"));
+      [screenHome, screenStudy, screenQuiz, screenResults, screenHighscores].forEach(s => s.classList.remove("active"));
       screenEl.classList.add("active");
       window.scrollTo(0,0);
     }
 
     // ===========
-    // STUDY GUIDE RENDER
+    // STUDY GUIDE
     // ===========
     const typeList = document.getElementById("typeList");
     function renderStudyGuide(){
@@ -447,29 +488,116 @@
     }
 
     // ===========
-    // QUIZ LOGIC
+    // HIGHSCORES (localStorage)
     // ===========
-    const MODE = {
-      TYPE_TO_DEF: 1,
-      DEF_TO_TYPE: 2,
-      EXAMPLE_TO_TYPE: 3
-    };
+    const STORAGE_KEY = "pwp_attempts_v1";
+
+    function loadAttempts(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+        return parsed;
+      } catch {
+        return [];
+      }
+    }
+
+    function saveAttempts(attempts){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(attempts));
+    }
+
+    function modeName(m){
+      if (m === 1) return "MODE 1: TYPE → DEFINITION";
+      if (m === 2) return "MODE 2: DEFINITION → TYPE";
+      return "MODE 3: EXAMPLE → TYPE";
+    }
+
+    function sortAttempts(attempts){
+      // Rule: #1 most correct, tie-breaker: fastest time
+      return attempts.slice().sort((a,b) => {
+        if (b.correct !== a.correct) return b.correct - a.correct;
+        return a.timeMs - b.timeMs;
+      });
+    }
+
+    function niceDate(iso){
+      const d = new Date(iso);
+      // simple readable format
+      return d.toLocaleString();
+    }
+
+    const hsCount = document.getElementById("hsCount");
+    const highscoreTableWrap = document.getElementById("highscoreTableWrap");
+
+    function renderHighscores(){
+      const attempts = sortAttempts(loadAttempts());
+      hsCount.textContent = "Saved attempts: " + attempts.length;
+
+      if (attempts.length === 0){
+        highscoreTableWrap.innerHTML = `<div class="pill">No attempts yet. Finish a mode to record a score.</div>`;
+        return;
+      }
+
+      let rows = "";
+      for (let i = 0; i < attempts.length; i++){
+        const a = attempts[i];
+        rows += `
+          <tr>
+            <td class="mono">${i + 1}</td>
+            <td>${escapeHTML(modeName(a.mode))}</td>
+            <td class="mono">${a.correct} / ${a.total}</td>
+            <td class="mono">${a.percent}%</td>
+            <td class="mono">${formatTime(a.timeMs)}</td>
+            <td class="mono">${escapeHTML(niceDate(a.when))}</td>
+          </tr>
+        `;
+      }
+
+      highscoreTableWrap.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Mode</th>
+              <th>Score</th>
+              <th>Percent</th>
+              <th>Time</th>
+              <th>When</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    // ===========
+    // QUIZ LOGIC + TIMER
+    // ===========
+    const MODE = { TYPE_TO_DEF: 1, DEF_TO_TYPE: 2, EXAMPLE_TO_TYPE: 3 };
 
     let mode = null;
 
     // Each mode uses every item once (shuffled order)
-    let deck = [];          // array of item indexes
+    let deck = [];
     let deckPos = 0;
 
     let correct = 0;
     let total = 0;
 
-    let locked = false;     // lock after answering
-    let current = null;     // { correctIndex, correctChoiceIndex, choices, promptHTML, label, sub }
+    let locked = false;
+    let current = null;
+
+    // Timer
+    let timerStartMs = 0;
+    let timerInterval = null;
+    let elapsedMs = 0;
 
     const quizTitle = document.getElementById("quizTitle");
     const pillProgress = document.getElementById("pillProgress");
     const pillScore = document.getElementById("pillScore");
+    const pillTime = document.getElementById("pillTime");
 
     const promptLabel = document.getElementById("promptLabel");
     const promptText = document.getElementById("promptText");
@@ -478,15 +606,27 @@
     const feedbackEl = document.getElementById("feedback");
     const btnNext = document.getElementById("btnNext");
 
-    function modeName(m){
-      if (m === MODE.TYPE_TO_DEF) return "Mode 1: Type → Definition";
-      if (m === MODE.DEF_TO_TYPE) return "Mode 2: Definition → Type";
-      return "Mode 3: Example → Type";
+    function startTimer(){
+      stopTimer();
+      timerStartMs = Date.now();
+      elapsedMs = 0;
+      pillTime.textContent = "Time " + formatTime(0);
+      timerInterval = setInterval(() => {
+        elapsedMs = Date.now() - timerStartMs;
+        pillTime.textContent = "Time " + formatTime(elapsedMs);
+      }, 250);
+    }
+
+    function stopTimer(){
+      if (timerInterval){
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
     }
 
     function startMode(m){
       mode = m;
-      deck = shuffle([...Array(items.length).keys()]); // 0..n-1 shuffled
+      deck = shuffle([...Array(items.length).keys()]);
       deckPos = 0;
 
       correct = 0;
@@ -495,6 +635,7 @@
       quizTitle.textContent = modeName(mode);
 
       showScreen(screenQuiz);
+      startTimer();
       loadQuestion();
     }
 
@@ -516,26 +657,26 @@
       let sub = "";
       let promptHTML = "";
       let choices = [];
-      let correctChoiceIndex = choiceIdxs.indexOf(correctIndex);
+      const correctChoiceIndex = choiceIdxs.indexOf(correctIndex);
 
       if (mode === MODE.TYPE_TO_DEF){
         label = "Type";
         sub = "Pick the correct definition.";
         promptHTML = escapeHTML(it.type);
-        choices = choiceIdxs.map(i => items[i].definition); // definitions (may have italics)
+        choices = choiceIdxs.map(i => items[i].definition);
       } else if (mode === MODE.DEF_TO_TYPE){
         label = "Definition";
         sub = "Pick the correct type.";
         promptHTML = italicizeStars(it.definition);
-        choices = choiceIdxs.map(i => items[i].type); // types
+        choices = choiceIdxs.map(i => items[i].type);
       } else {
         label = "Example";
         sub = "Pick the correct type.";
         promptHTML = italicizeStars(it.example).replaceAll("\n","<br>");
-        choices = choiceIdxs.map(i => items[i].type); // types
+        choices = choiceIdxs.map(i => items[i].type);
       }
 
-      current = { correctIndex, correctChoiceIndex, choiceIdxs, choices, label, sub, it };
+      current = { correctIndex, correctChoiceIndex, choiceIdxs, choices, it };
 
       promptLabel.textContent = label;
       promptText.innerHTML = promptHTML;
@@ -563,7 +704,7 @@
         const right = document.createElement("div");
         right.className = "answerText";
 
-        // Only definitions/examples can contain *italics*
+        // Definitions may have *italics*
         if (mode === MODE.TYPE_TO_DEF){
           right.innerHTML = italicizeStars(choice);
         } else {
@@ -579,8 +720,7 @@
     }
 
     function lockAnswers(){
-      const btns = Array.from(answersEl.querySelectorAll("button"));
-      btns.forEach(b => b.disabled = true);
+      Array.from(answersEl.querySelectorAll("button")).forEach(b => b.disabled = true);
     }
 
     function choose(choiceIndex){
@@ -600,7 +740,6 @@
       const chosenBtn = btns[choiceIndex];
       if (chosenBtn && !isCorrect) chosenBtn.classList.add("bad");
 
-      // Feedback + explanation
       const it = current.it;
       const defHTML = italicizeStars(it.definition);
       const exHTML = italicizeStars(it.example).replaceAll("\n","<br>");
@@ -627,9 +766,7 @@
         ${expl}
       `;
 
-      // Update pillScore after answering
       pillScore.textContent = "Score " + correct + " / " + (deckPos + 1);
-
       btnNext.disabled = false;
     }
 
@@ -647,15 +784,20 @@
     }
 
     // ===========
-    // RESULTS
+    // RESULTS + SAVE ATTEMPT
     // ===========
     const resultsTitle = document.getElementById("resultsTitle");
     const resultsPill = document.getElementById("resultsPill");
     const resCorrect = document.getElementById("resCorrect");
     const resTotal = document.getElementById("resTotal");
     const resPercent = document.getElementById("resPercent");
+    const resTime = document.getElementById("resTime");
 
     function showResults(){
+      stopTimer();
+      // final elapsed
+      elapsedMs = Date.now() - timerStartMs;
+
       const percent = Math.round((correct / total) * 100);
 
       resultsTitle.textContent = modeName(mode) + " Results";
@@ -664,11 +806,21 @@
       resCorrect.textContent = String(correct);
       resTotal.textContent = String(total);
       resPercent.textContent = percent + "%";
+      resTime.textContent = formatTime(elapsedMs);
+
+      // Save attempt
+      const attempts = loadAttempts();
+      attempts.push({
+        when: nowISO(),
+        mode: mode,
+        correct: correct,
+        total: total,
+        percent: percent,
+        timeMs: elapsedMs
+      });
+      saveAttempts(attempts);
 
       showScreen(screenResults);
-
-      // IMPORTANT: Mode lock is enforced by only allowing navigation back after results
-      // (Back to Menu button is only on results screen)
     }
 
     // ===========
@@ -687,10 +839,24 @@
       showScreen(screenHome);
     });
 
+    document.getElementById("btnHighscores").addEventListener("click", () => {
+      renderHighscores();
+      showScreen(screenHighscores);
+    });
+
+    document.getElementById("btnBackFromHighscores").addEventListener("click", () => {
+      showScreen(screenHome);
+    });
+
+    document.getElementById("btnClearHighscores").addEventListener("click", () => {
+      localStorage.removeItem(STORAGE_KEY);
+      renderHighscores();
+    });
+
     btnNext.addEventListener("click", () => next());
 
     document.getElementById("btnBackToHome").addEventListener("click", () => {
-      // Now you are allowed to leave because the mode is finished
+      // Allowed to leave because mode is finished
       mode = null;
       showScreen(screenHome);
     });
@@ -700,7 +866,12 @@
       showScreen(screenStudy);
     });
 
-    // Initial study guide pre-render (optional)
+    document.getElementById("btnGoHighscores").addEventListener("click", () => {
+      renderHighscores();
+      showScreen(screenHighscores);
+    });
+
+    // Initial render
     renderStudyGuide();
   </script>
 </body>
