@@ -3,18 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Figurative Language Trainer</title>
-  <meta name="description" content="Learn figurative language with 3 interactive quiz modes." />
+  <title>Poetic Writing Practice</title>
+  <meta name="description" content="Practice poetic devices with 3 locked-in quiz modes." />
   <style>
     :root{
       --bg:#0b1020;
       --card:#121a33;
-      --card2:#0f1730;
       --text:#eef2ff;
       --muted:#b7c0ff;
       --accent:#7c3aed;
-      --accent2:#22c55e;
-      --danger:#ef4444;
+      --good:#22c55e;
+      --bad:#ef4444;
       --border:rgba(255,255,255,.12);
       --shadow: 0 14px 40px rgba(0,0,0,.45);
       --radius: 18px;
@@ -30,46 +29,36 @@
         var(--bg);
       color:var(--text);
       line-height:1.35;
+      min-height:100vh;
     }
-    a{color:inherit}
-    header{
-      padding: 28px 16px 10px;
-      max-width: 1100px;
-      margin: 0 auto;
+
+    /* Fullscreen "single screen at a time" */
+    .screen{
+      display:none;
+      min-height:100vh;
+      padding: 18px 16px 28px;
     }
-    .topbar{
-      display:flex; gap:12px; align-items:center; justify-content:space-between;
-      flex-wrap:wrap;
-    }
+    .screen.active{display:block}
+
+    .wrap{max-width:1100px;margin:0 auto}
+
     .brand{
       display:flex; align-items:center; gap:12px;
+      padding: 10px 0 6px;
     }
     .logo{
-      width:44px; height:44px; border-radius:14px;
+      width:48px; height:48px; border-radius:16px;
       background: linear-gradient(135deg, rgba(124,58,237,.9), rgba(34,197,94,.75));
       box-shadow: 0 10px 25px rgba(124,58,237,.25);
+      flex:0 0 auto;
     }
     h1{
-      font-size: clamp(18px, 3vw, 26px);
       margin:0;
+      font-size: clamp(22px, 3.2vw, 34px);
       letter-spacing:.2px;
     }
-    .subtitle{
-      color:var(--muted);
-      margin-top:6px;
-      font-size: 14px;
-    }
-    main{
-      max-width:1100px;
-      margin:0 auto;
-      padding: 12px 16px 40px;
-      display:grid;
-      gap:14px;
-      grid-template-columns: 1.1fr .9fr;
-    }
-    @media (max-width: 920px){
-      main{grid-template-columns:1fr}
-    }
+    .subtitle{color:var(--muted); margin-top:4px; font-size:14px}
+
     .card{
       background: rgba(18,26,51,.78);
       border:1px solid var(--border);
@@ -77,7 +66,7 @@
       box-shadow: var(--shadow);
       overflow:hidden;
     }
-    .card .hd{
+    .hd{
       padding: 16px 16px 10px;
       display:flex;
       align-items:flex-start;
@@ -86,37 +75,23 @@
       background: linear-gradient(180deg, rgba(255,255,255,.04), transparent);
       border-bottom:1px solid rgba(255,255,255,.06);
     }
-    .card .hd h2{
+    .hd h2{
       margin:0;
       font-size: 16px;
       letter-spacing:.2px;
     }
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 8px 10px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04);
-      border-radius: 999px;
-      color: var(--muted);
-      font-size: 12px;
-      user-select:none;
-      white-space:nowrap;
-    }
     .bd{padding:16px}
-    .row{
-      display:flex; gap:10px; flex-wrap:wrap;
-      align-items:center;
-    }
+
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+
     button{
       appearance:none;
       border:1px solid rgba(255,255,255,.14);
       background: rgba(255,255,255,.05);
       color: var(--text);
       border-radius: 14px;
-      padding: 10px 12px;
-      font-weight: 650;
+      padding: 12px 14px;
+      font-weight: 750;
       letter-spacing:.1px;
       cursor:pointer;
       transition: transform .07s ease, background .15s ease, border-color .15s ease;
@@ -132,7 +107,7 @@
       border-color: rgba(34,197,94,.55);
       background: rgba(34,197,94,.14);
     }
-    button.danger{
+    button.bad{
       border-color: rgba(239,68,68,.55);
       background: rgba(239,68,68,.14);
     }
@@ -144,30 +119,34 @@
       cursor:not-allowed;
       transform:none;
     }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 12px;
+      user-select:none;
+      white-space:nowrap;
+    }
+
+    /* Quiz UI */
     .prompt{
       background: rgba(255,255,255,.03);
       border:1px solid rgba(255,255,255,.10);
       border-radius: 16px;
       padding: 14px 14px;
-      margin-top: 10px;
-    }
-    .prompt .label{
-      color: var(--muted);
-      font-size: 12px;
-      margin-bottom:6px;
-    }
-    .prompt .text{
-      font-size: 18px;
-      font-weight: 750;
-      letter-spacing:.2px;
-    }
-    .muted{color:var(--muted)}
-    .small{font-size:12px}
-    .answers{
       margin-top: 12px;
-      display:grid;
-      gap:10px;
     }
+    .prompt .label{color: var(--muted); font-size: 12px; margin-bottom:6px}
+    .prompt .text{font-size: 18px; font-weight: 850; letter-spacing:.2px}
+    .prompt .sub{color:var(--muted); font-size:12px; margin-top:6px}
+
+    .answers{margin-top: 12px; display:grid; gap:10px}
     .answerBtn{
       text-align:left;
       padding: 12px 12px;
@@ -186,38 +165,55 @@
       border:1px solid rgba(255,255,255,.10);
       color: var(--muted);
       font-size: 12px;
-      font-weight: 800;
+      font-weight: 900;
       flex: 0 0 auto;
       margin-top: 1px;
     }
-    .answerText{
-      font-weight: 650;
-    }
+    .answerText{font-weight: 700}
+
     .feedback{
       margin-top:12px;
       padding: 12px;
       border-radius: 16px;
       border:1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.04);
+      display:none;
     }
     .feedback.good{
+      display:block;
       border-color: rgba(34,197,94,.35);
       background: rgba(34,197,94,.10);
     }
     .feedback.bad{
+      display:block;
       border-color: rgba(239,68,68,.35);
       background: rgba(239,68,68,.10);
     }
+
+    /* Study guide */
+    .typeList{margin-top:10px; display:grid; gap:10px}
+    .typeItem{
+      padding: 12px;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+    }
+    .typeItem .t{font-weight: 900; font-size: 14px; margin-bottom: 6px}
+    .typeItem .d{color: var(--muted)}
+    .typeItem .e{
+      margin-top: 8px;
+      font-style: italic;
+      opacity: .95;
+      white-space: pre-wrap;
+    }
+
     .kpis{
       display:grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap:10px;
-      margin-top: 10px;
+      margin-top: 12px;
     }
-    @media (max-width: 920px){
-      .kpis{grid-template-columns: 1fr 1fr}
-    }
-    @media (max-width: 520px){
+    @media (max-width: 720px){
       .kpis{grid-template-columns: 1fr}
     }
     .kpi{
@@ -226,166 +222,146 @@
       border:1px solid rgba(255,255,255,.10);
       background: rgba(15,23,48,.55);
     }
-    .kpi .v{
-      font-size: 20px;
-      font-weight: 850;
-      margin-top:2px;
-    }
-    .hr{
-      height:1px;
-      background: rgba(255,255,255,.10);
-      margin: 14px 0;
-    }
-    details{
-      border:1px solid rgba(255,255,255,.10);
-      border-radius: 16px;
-      background: rgba(255,255,255,.03);
-      padding: 10px 12px;
-    }
-    summary{cursor:pointer; font-weight:750}
-    .typeList{
-      margin-top:10px;
-      display:grid;
-      gap:10px;
-    }
-    .typeItem{
-      padding: 12px;
-      border-radius: 16px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.03);
-    }
-    .typeItem .t{
-      font-weight: 900;
-      font-size: 14px;
-      margin-bottom: 6px;
-    }
-    .typeItem .d{color: var(--muted)}
-    .typeItem .e{
-      margin-top: 8px;
-      font-style: italic;
-      opacity: .95;
-    }
-    .toast{
-      margin-top: 10px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04);
-      color: var(--muted);
-      font-size: 12px;
-    }
-    .footerNote{
-      max-width:1100px;
-      margin: 0 auto;
-      padding: 0 16px 22px;
-      color: rgba(238,242,255,.75);
-      font-size: 12px;
-    }
-    .mono{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 12px;
-      color: rgba(238,242,255,.75);
-    }
+    .kpi .label{color:var(--muted); font-size:12px}
+    .kpi .v{font-size: 22px; font-weight: 900; margin-top:4px}
   </style>
 </head>
 <body>
-  <header>
-    <div class="topbar">
+
+  <!-- HOME SCREEN -->
+  <section class="screen active" id="screenHome">
+    <div class="wrap">
       <div class="brand">
         <div class="logo" aria-hidden="true"></div>
         <div>
-          <h1>Figurative Language Trainer</h1>
-          <div class="subtitle">3 modes • instant feedback • learn by practicing</div>
+          <h1>Poetic Writing Practice</h1>
+          <div class="subtitle">Pick a mode. You must finish it to return.</div>
         </div>
       </div>
-      <div class="row">
-        <span class="pill" id="modePill">Mode: —</span>
-        <span class="pill" id="questionPill">Question: —</span>
-        <span class="pill" id="scorePill">Score: —</span>
+
+      <div class="card">
+        <div class="hd">
+          <h2>Choose a Mode</h2>
+          <span class="pill">3 modes • 1 try per question</span>
+        </div>
+        <div class="bd">
+          <div class="row">
+            <button class="primary" id="btnStart1">Mode 1: Type → Definition</button>
+            <button class="primary" id="btnStart2">Mode 2: Definition → Type</button>
+            <button class="primary" id="btnStart3">Mode 3: Example → Type</button>
+          </div>
+          <div style="height:12px"></div>
+          <div class="row">
+            <button class="ghost" id="btnStudy">Study Guide</button>
+          </div>
+          <div style="height:12px"></div>
+          <div class="pill" id="homeHint">Tip: Each mode uses every item once (8 questions).</div>
+        </div>
       </div>
     </div>
-  </header>
+  </section>
 
-  <main>
-    <section class="card" aria-label="Quiz">
-      <div class="hd">
-        <h2>Quiz</h2>
-        <span class="pill" id="streakPill">Streak: 0</span>
-      </div>
-      <div class="bd">
-        <div class="row">
-          <button class="primary" id="btnMode1">Mode 1: Type → Definition</button>
-          <button class="primary" id="btnMode2">Mode 2: Definition → Type</button>
-          <button class="primary" id="btnMode3">Mode 3: Example → Type</button>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="row">
-          <button class="good" id="btnNew">New Question</button>
-          <button class="ghost" id="btnReveal">Reveal Answer</button>
-          <button class="danger" id="btnReset">Reset Score</button>
-        </div>
-
-        <div class="prompt">
-          <div class="label" id="promptLabel">Prompt</div>
-          <div class="text" id="promptText">Choose a mode to start.</div>
-          <div class="muted small" id="promptSub"></div>
-        </div>
-
-        <div class="answers" id="answers"></div>
-
-        <div class="feedback" id="feedback" style="display:none"></div>
-
-        <div class="kpis">
-          <div class="kpi">
-            <div class="muted small">Correct</div>
-            <div class="v" id="kpiCorrect">0</div>
-          </div>
-          <div class="kpi">
-            <div class="muted small">Attempts</div>
-            <div class="v" id="kpiAttempts">0</div>
-          </div>
-          <div class="kpi">
-            <div class="muted small">Accuracy</div>
-            <div class="v" id="kpiAcc">0%</div>
-          </div>
-        </div>
-
-        <div class="toast">
-          Tip: Click <b>New Question</b> after you answer (or switch modes anytime).
+  <!-- STUDY GUIDE SCREEN -->
+  <section class="screen" id="screenStudy">
+    <div class="wrap">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Study Guide</h1>
+          <div class="subtitle">Review types, definitions, and examples.</div>
         </div>
       </div>
-    </section>
 
-    <aside class="card" aria-label="Study Guide">
-      <div class="hd">
-        <h2>Study Guide</h2>
-        <span class="pill">Learn these first</span>
-      </div>
-      <div class="bd">
-        <details open>
-          <summary>Types, Definitions, Examples</summary>
+      <div class="card">
+        <div class="hd">
+          <h2>Types, Definitions, Examples</h2>
+          <button class="ghost" id="btnBackFromStudy">Back</button>
+        </div>
+        <div class="bd">
           <div class="typeList" id="typeList"></div>
-        </details>
-
-        <div class="hr"></div>
-
-        <details>
-          <summary>What “*stars*” mean</summary>
-          <div class="muted" style="margin-top:8px">
-            Words wrapped in <span class="mono">*</span>like this<span class="mono">*</span> will appear <em>italicized</em>.
-          </div>
-        </details>
+        </div>
       </div>
-    </aside>
-  </main>
+    </div>
+  </section>
 
-  <div class="footerNote">
-    Built as a single <span class="mono">index.html</span> file for GitHub Pages.
-  </div>
+  <!-- QUIZ SCREEN (FULLSCREEN MODE) -->
+  <section class="screen" id="screenQuiz">
+    <div class="wrap">
+      <div class="card">
+        <div class="hd">
+          <h2 id="quizTitle">Mode</h2>
+          <div class="row">
+            <span class="pill" id="pillProgress">Question —</span>
+            <span class="pill" id="pillScore">Score —</span>
+          </div>
+        </div>
+        <div class="bd">
+          <div class="prompt" role="status" aria-live="polite">
+            <div class="label" id="promptLabel">Prompt</div>
+            <div class="text" id="promptText">—</div>
+            <div class="sub" id="promptSub">—</div>
+          </div>
+
+          <div class="answers" id="answers"></div>
+
+          <div class="feedback" id="feedback"></div>
+
+          <div style="height:12px"></div>
+          <div class="row">
+            <button class="good" id="btnNext" disabled>Next</button>
+            <span class="pill">You cannot leave until finished.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS SCREEN -->
+  <section class="screen" id="screenResults">
+    <div class="wrap">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1 id="resultsTitle">Results</h1>
+          <div class="subtitle">Mode complete.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="hd">
+          <h2>Score Summary</h2>
+          <span class="pill" id="resultsPill">—</span>
+        </div>
+        <div class="bd">
+          <div class="kpis">
+            <div class="kpi">
+              <div class="label">Correct</div>
+              <div class="v" id="resCorrect">0</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Total Questions</div>
+              <div class="v" id="resTotal">0</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Percentage</div>
+              <div class="v" id="resPercent">0%</div>
+            </div>
+          </div>
+
+          <div style="height:14px"></div>
+          <div class="row">
+            <button class="primary" id="btnBackToHome">Back to Menu</button>
+            <button class="ghost" id="btnReviewStudy">Open Study Guide</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <script>
+    // ===========
+    // DATA (your text, with only the previously-noted spelling/grammar fixes applied)
+    // ===========
     const items = [
       { type: "Simile", definition: "A comparison using *like* or *as*", example: "Her smile was like the sun." },
       { type: "Metaphor", definition: "A comparison that says something *is* something else (no like or as).", example: "Her eyes were diamonds." },
@@ -397,6 +373,9 @@
       { type: "word layout", definition: "How words are arranged on the page to add meaning or emotion", example: "sl\n                    ow\n                         ly\n                              fa\n                                  ll\n                                    ing" }
     ];
 
+    // ===========
+    // HELPERS
+    // ===========
     function escapeHTML(str){
       return String(str)
         .replaceAll("&","&amp;")
@@ -406,6 +385,7 @@
         .replaceAll("'","&#039;");
     }
 
+    // Convert *word* to <em>word</em> (italic)
     function italicizeStars(str){
       const raw = String(str);
       const parts = raw.split("*");
@@ -426,50 +406,34 @@
       return a;
     }
 
-    function pickN(arr, n, excludeIndex){
+    function pickNIndexes(total, n, excludeIndex){
       const idxs = [];
-      for (let i = 0; i < arr.length; i++){
-        if (i !== excludeIndex){ idxs.push(i); }
+      for (let i = 0; i < total; i++){
+        if (i !== excludeIndex) idxs.push(i);
       }
       return shuffle(idxs).slice(0, n);
     }
 
-    const modePill = document.getElementById("modePill");
-    const questionPill = document.getElementById("questionPill");
-    const scorePill = document.getElementById("scorePill");
-    const streakPill = document.getElementById("streakPill");
+    // ===========
+    // SCREENS
+    // ===========
+    const screenHome = document.getElementById("screenHome");
+    const screenStudy = document.getElementById("screenStudy");
+    const screenQuiz = document.getElementById("screenQuiz");
+    const screenResults = document.getElementById("screenResults");
 
-    const promptLabel = document.getElementById("promptLabel");
-    const promptText = document.getElementById("promptText");
-    const promptSub = document.getElementById("promptSub");
-    const answersEl = document.getElementById("answers");
-    const feedbackEl = document.getElementById("feedback");
+    function showScreen(screenEl){
+      [screenHome, screenStudy, screenQuiz, screenResults].forEach(s => s.classList.remove("active"));
+      screenEl.classList.add("active");
+      window.scrollTo(0,0);
+    }
 
-    const kpiCorrect = document.getElementById("kpiCorrect");
-    const kpiAttempts = document.getElementById("kpiAttempts");
-    const kpiAcc = document.getElementById("kpiAcc");
-
-    const btnMode1 = document.getElementById("btnMode1");
-    const btnMode2 = document.getElementById("btnMode2");
-    const btnMode3 = document.getElementById("btnMode3");
-    const btnNew = document.getElementById("btnNew");
-    const btnReveal = document.getElementById("btnReveal");
-    const btnReset = document.getElementById("btnReset");
-
-    const MODE = { TYPE_TO_DEF: 1, DEF_TO_TYPE: 2, EXAMPLE_TO_TYPE: 3 };
-
-    let mode = MODE.TYPE_TO_DEF;
-    let current = null;
-    let locked = false;
-
-    let attempts = 0;
-    let correct = 0;
-    let streak = 0;
-    let qnum = 0;
-
+    // ===========
+    // STUDY GUIDE RENDER
+    // ===========
+    const typeList = document.getElementById("typeList");
     function renderStudyGuide(){
-      const list = document.getElementById("typeList");
-      list.innerHTML = "";
+      typeList.innerHTML = "";
       for (const it of items){
         const div = document.createElement("div");
         div.className = "typeItem";
@@ -478,82 +442,109 @@
           <div class="d">${italicizeStars(it.definition)}</div>
           <div class="e">${italicizeStars(it.example).replaceAll("\n","<br>")}</div>
         `;
-        list.appendChild(div);
+        typeList.appendChild(div);
       }
     }
 
-    function setMode(newMode){
-      mode = newMode;
+    // ===========
+    // QUIZ LOGIC
+    // ===========
+    const MODE = {
+      TYPE_TO_DEF: 1,
+      DEF_TO_TYPE: 2,
+      EXAMPLE_TO_TYPE: 3
+    };
 
-      const label =
-        mode === MODE.TYPE_TO_DEF ? "Type → Definition" :
-        mode === MODE.DEF_TO_TYPE ? "Definition → Type" :
-        "Example → Type";
+    let mode = null;
 
-      modePill.textContent = "Mode: " + label;
-      newQuestion();
+    // Each mode uses every item once (shuffled order)
+    let deck = [];          // array of item indexes
+    let deckPos = 0;
+
+    let correct = 0;
+    let total = 0;
+
+    let locked = false;     // lock after answering
+    let current = null;     // { correctIndex, correctChoiceIndex, choices, promptHTML, label, sub }
+
+    const quizTitle = document.getElementById("quizTitle");
+    const pillProgress = document.getElementById("pillProgress");
+    const pillScore = document.getElementById("pillScore");
+
+    const promptLabel = document.getElementById("promptLabel");
+    const promptText = document.getElementById("promptText");
+    const promptSub = document.getElementById("promptSub");
+    const answersEl = document.getElementById("answers");
+    const feedbackEl = document.getElementById("feedback");
+    const btnNext = document.getElementById("btnNext");
+
+    function modeName(m){
+      if (m === MODE.TYPE_TO_DEF) return "Mode 1: Type → Definition";
+      if (m === MODE.DEF_TO_TYPE) return "Mode 2: Definition → Type";
+      return "Mode 3: Example → Type";
     }
 
-    function newQuestion(){
-      locked = false;
-      feedbackEl.style.display = "none";
-      feedbackEl.className = "feedback";
-      answersEl.innerHTML = "";
-      promptSub.textContent = "";
+    function startMode(m){
+      mode = m;
+      deck = shuffle([...Array(items.length).keys()]); // 0..n-1 shuffled
+      deckPos = 0;
 
-      const correctIndex = Math.floor(Math.random() * items.length);
-      const correctItem = items[correctIndex];
+      correct = 0;
+      total = items.length;
+
+      quizTitle.textContent = modeName(mode);
+
+      showScreen(screenQuiz);
+      loadQuestion();
+    }
+
+    function loadQuestion(){
+      locked = false;
+      btnNext.disabled = true;
+      feedbackEl.className = "feedback";
+      feedbackEl.style.display = "none";
+      answersEl.innerHTML = "";
+
+      const correctIndex = deck[deckPos];
+      const it = items[correctIndex];
 
       const choiceCount = 4;
-      const otherIdxs = pickN(items, choiceCount - 1, correctIndex);
-      const choiceIdxs = shuffle([correctIndex, ...otherIdxs]);
+      const distractorIdxs = pickNIndexes(items.length, choiceCount - 1, correctIndex);
+      const choiceIdxs = shuffle([correctIndex, ...distractorIdxs]);
 
-      let promptMain = "";
+      let label = "";
       let sub = "";
+      let promptHTML = "";
       let choices = [];
-      let correctChoiceIndex = -1;
+      let correctChoiceIndex = choiceIdxs.indexOf(correctIndex);
 
       if (mode === MODE.TYPE_TO_DEF){
-        promptLabel.textContent = "Type";
-        promptMain = correctItem.type;
+        label = "Type";
         sub = "Pick the correct definition.";
-
-        choices = choiceIdxs.map(idx => items[idx].definition);
-        correctChoiceIndex = choiceIdxs.indexOf(correctIndex);
-
+        promptHTML = escapeHTML(it.type);
+        choices = choiceIdxs.map(i => items[i].definition); // definitions (may have italics)
       } else if (mode === MODE.DEF_TO_TYPE){
-        promptLabel.textContent = "Definition";
-        promptMain = correctItem.definition;
+        label = "Definition";
         sub = "Pick the correct type.";
-
-        choices = choiceIdxs.map(idx => items[idx].type);
-        correctChoiceIndex = choiceIdxs.indexOf(correctIndex);
-
+        promptHTML = italicizeStars(it.definition);
+        choices = choiceIdxs.map(i => items[i].type); // types
       } else {
-        promptLabel.textContent = "Example";
-        promptMain = correctItem.example;
+        label = "Example";
         sub = "Pick the correct type.";
-
-        choices = choiceIdxs.map(idx => items[idx].type);
-        correctChoiceIndex = choiceIdxs.indexOf(correctIndex);
+        promptHTML = italicizeStars(it.example).replaceAll("\n","<br>");
+        choices = choiceIdxs.map(i => items[i].type); // types
       }
 
-      current = { correctItem, correctChoiceIndex, choices, mode };
+      current = { correctIndex, correctChoiceIndex, choiceIdxs, choices, label, sub, it };
 
-      qnum += 1;
-      questionPill.textContent = "Question: " + qnum;
-
-      if (mode === MODE.DEF_TO_TYPE){
-        promptText.innerHTML = italicizeStars(promptMain);
-      } else if (mode === MODE.EXAMPLE_TO_TYPE){
-        promptText.innerHTML = italicizeStars(promptMain).replaceAll("\n","<br>");
-      } else {
-        promptText.textContent = promptMain;
-      }
+      promptLabel.textContent = label;
+      promptText.innerHTML = promptHTML;
       promptSub.textContent = sub;
 
+      pillProgress.textContent = "Question " + (deckPos + 1) + " of " + total;
+      pillScore.textContent = "Score " + correct + " / " + deckPos;
+
       renderChoices();
-      updateStats();
     }
 
     function renderChoices(){
@@ -572,7 +563,8 @@
         const right = document.createElement("div");
         right.className = "answerText";
 
-        if (current.mode === MODE.TYPE_TO_DEF){
+        // Only definitions/examples can contain *italics*
+        if (mode === MODE.TYPE_TO_DEF){
           right.innerHTML = italicizeStars(choice);
         } else {
           right.textContent = choice;
@@ -581,75 +573,135 @@
         btn.appendChild(left);
         btn.appendChild(right);
 
-        btn.addEventListener("click", () => choose(i, btn));
+        btn.addEventListener("click", () => choose(i));
         answersEl.appendChild(btn);
       });
     }
 
-    function choose(i, btn){
-      if (!current || locked) return;
+    function lockAnswers(){
+      const btns = Array.from(answersEl.querySelectorAll("button"));
+      btns.forEach(b => b.disabled = true);
+    }
 
+    function choose(choiceIndex){
+      if (locked) return;
       locked = true;
-      attempts += 1;
 
-      const allButtons = Array.from(answersEl.querySelectorAll("button"));
-      allButtons.forEach(b => b.disabled = true);
+      lockAnswers();
 
-      const isCorrect = (i === current.correctChoiceIndex);
+      const isCorrect = (choiceIndex === current.correctChoiceIndex);
+      if (isCorrect) correct += 1;
 
-      if (isCorrect){
-        correct += 1;
-        streak += 1;
-        feedbackEl.style.display = "block";
-        feedbackEl.className = "feedback good";
-        feedbackEl.innerHTML = `<b>Correct!</b> 🎉`;
+      // Highlight correct + chosen
+      const btns = Array.from(answersEl.querySelectorAll("button"));
+      const correctBtn = btns[current.correctChoiceIndex];
+      if (correctBtn) correctBtn.classList.add("good");
+
+      const chosenBtn = btns[choiceIndex];
+      if (chosenBtn && !isCorrect) chosenBtn.classList.add("bad");
+
+      // Feedback + explanation
+      const it = current.it;
+      const defHTML = italicizeStars(it.definition);
+      const exHTML = italicizeStars(it.example).replaceAll("\n","<br>");
+
+      let expl = "";
+      if (mode === MODE.TYPE_TO_DEF){
+        expl = `<div style="margin-top:8px" class="muted">${defHTML}</div>
+                <div style="margin-top:6px" class="muted"><i>${exHTML}</i></div>`;
+      } else if (mode === MODE.DEF_TO_TYPE){
+        expl = `<div style="margin-top:8px" class="muted"><i>${exHTML}</i></div>`;
       } else {
-        streak = 0;
-        feedbackEl.style.display = "block";
-        feedbackEl.className = "feedback bad";
-        feedbackEl.innerHTML = `<b>Not quite!</b> The answer was <b>${escapeHTML(current.correctItem.type)}</b>.`;
+        expl = `<div style="margin-top:8px" class="muted">${defHTML}</div>`;
       }
 
-      updateStats();
-    }
-
-    function updateStats(){
-      kpiCorrect.textContent = String(correct);
-      kpiAttempts.textContent = String(attempts);
-      const acc = attempts === 0 ? 0 : Math.round((correct / attempts) * 100);
-      kpiAcc.textContent = acc + "%";
-      streakPill.textContent = "Streak: " + streak;
-      scorePill.textContent = "Score: " + correct + " / " + attempts;
-    }
-
-    function resetStats(){
-      attempts = 0; correct = 0; streak = 0; qnum = 0;
-      updateStats();
-      questionPill.textContent = "Question: —";
-      feedbackEl.style.display = "none";
-      promptLabel.textContent = "Prompt";
-      promptText.textContent = "Choose a mode to start.";
-      promptSub.textContent = "";
-      answersEl.innerHTML = "";
-      modePill.textContent = "Mode: —";
-    }
-
-    btnMode1.addEventListener("click", () => setMode(MODE.TYPE_TO_DEF));
-    btnMode2.addEventListener("click", () => setMode(MODE.DEF_TO_TYPE));
-    btnMode3.addEventListener("click", () => setMode(MODE.EXAMPLE_TO_TYPE));
-    btnNew.addEventListener("click", () => newQuestion());
-    btnReveal.addEventListener("click", () => {
-      if (!current) return;
       feedbackEl.style.display = "block";
-      feedbackEl.className = "feedback";
-      feedbackEl.innerHTML = `<b>Answer:</b> ${escapeHTML(current.correctItem.type)}`;
-    });
-    btnReset.addEventListener("click", () => resetStats());
+      feedbackEl.className = "feedback " + (isCorrect ? "good" : "bad");
+      feedbackEl.innerHTML = `
+        <div style="font-weight:900; font-size:14px">
+          ${isCorrect ? "Correct! 🎉" : "Not quite."}
+        </div>
+        <div style="margin-top:6px">
+          <b>${escapeHTML(it.type)}</b>
+        </div>
+        ${expl}
+      `;
 
+      // Update pillScore after answering
+      pillScore.textContent = "Score " + correct + " / " + (deckPos + 1);
+
+      btnNext.disabled = false;
+    }
+
+    function next(){
+      if (!locked) return;
+
+      deckPos += 1;
+
+      if (deckPos >= total){
+        showResults();
+        return;
+      }
+
+      loadQuestion();
+    }
+
+    // ===========
+    // RESULTS
+    // ===========
+    const resultsTitle = document.getElementById("resultsTitle");
+    const resultsPill = document.getElementById("resultsPill");
+    const resCorrect = document.getElementById("resCorrect");
+    const resTotal = document.getElementById("resTotal");
+    const resPercent = document.getElementById("resPercent");
+
+    function showResults(){
+      const percent = Math.round((correct / total) * 100);
+
+      resultsTitle.textContent = modeName(mode) + " Results";
+      resultsPill.textContent = percent + "%";
+
+      resCorrect.textContent = String(correct);
+      resTotal.textContent = String(total);
+      resPercent.textContent = percent + "%";
+
+      showScreen(screenResults);
+
+      // IMPORTANT: Mode lock is enforced by only allowing navigation back after results
+      // (Back to Menu button is only on results screen)
+    }
+
+    // ===========
+    // BUTTONS / NAV
+    // ===========
+    document.getElementById("btnStart1").addEventListener("click", () => startMode(MODE.TYPE_TO_DEF));
+    document.getElementById("btnStart2").addEventListener("click", () => startMode(MODE.DEF_TO_TYPE));
+    document.getElementById("btnStart3").addEventListener("click", () => startMode(MODE.EXAMPLE_TO_TYPE));
+
+    document.getElementById("btnStudy").addEventListener("click", () => {
+      renderStudyGuide();
+      showScreen(screenStudy);
+    });
+
+    document.getElementById("btnBackFromStudy").addEventListener("click", () => {
+      showScreen(screenHome);
+    });
+
+    btnNext.addEventListener("click", () => next());
+
+    document.getElementById("btnBackToHome").addEventListener("click", () => {
+      // Now you are allowed to leave because the mode is finished
+      mode = null;
+      showScreen(screenHome);
+    });
+
+    document.getElementById("btnReviewStudy").addEventListener("click", () => {
+      renderStudyGuide();
+      showScreen(screenStudy);
+    });
+
+    // Initial study guide pre-render (optional)
     renderStudyGuide();
-    modePill.textContent = "Mode: —";
-    questionPill.textContent = "Question: —";
-    scorePill.textContent = "Score: 0 / 0";
   </script>
 </body>
 </html>
