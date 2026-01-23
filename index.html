@@ -195,6 +195,16 @@
     .kpi .label{color:var(--muted); font-size:12px}
     .kpi .v{font-size: 22px; font-weight: 900; margin-top:4px}
 
+    .cols{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap:12px;
+      margin-top: 10px;
+    }
+    @media (max-width: 980px){
+      .cols{grid-template-columns: 1fr}
+    }
+
     table{
       width:100%;
       border-collapse: collapse;
@@ -286,7 +296,7 @@
         <div class="logo" aria-hidden="true"></div>
         <div>
           <h1>Highscores</h1>
-          <div class="subtitle">Sorted by most correct, then fastest time.</div>
+          <div class="subtitle">Each mode has its own column. Sorted by most correct, then fastest time.</div>
         </div>
       </div>
 
@@ -300,7 +310,7 @@
         </div>
         <div class="bd">
           <div class="pill" id="hsCount">—</div>
-          <div id="highscoreTableWrap"></div>
+          <div class="cols" id="hsCols"></div>
         </div>
       </div>
     </div>
@@ -332,7 +342,6 @@
           <div style="height:12px"></div>
           <div class="row">
             <button class="good" id="btnNext" disabled>Next</button>
-            <span class="pill">You cannot leave until finished.</span>
           </div>
         </div>
       </div>
@@ -413,7 +422,7 @@
         .replaceAll("'","&#039;");
     }
 
-    // Convert *word* to <em>word</em> (italic). (We keep your *like* / *as* behavior.)
+    // Convert *word* to <em>word</em> (italic).
     function italicizeStars(str){
       const raw = String(str);
       const parts = raw.split("*");
@@ -425,11 +434,22 @@
       return out;
     }
 
-    // Sentence case: ONLY first letter uppercase, rest lowercase
-    function sentenceCase(str){
+    // Sentence case that capitalizes the FIRST LETTER (even if quotes/punctuation come first)
+    // Example: "\"never give up\"" -> "\"Never give up\""
+    function sentenceCaseSmart(str){
       const s = String(str).trim().toLowerCase();
       if (s.length === 0) return s;
-      return s.charAt(0).toUpperCase() + s.slice(1);
+
+      // Find first a-z letter and capitalize it
+      let chars = s.split("");
+      for (let i = 0; i < chars.length; i++){
+        const c = chars[i];
+        if (c >= "a" && c <= "z"){
+          chars[i] = c.toUpperCase();
+          break;
+        }
+      }
+      return chars.join("");
     }
 
     function shuffle(arr){
@@ -521,7 +541,7 @@
     }
 
     function sortAttempts(attempts){
-      // Rule: #1 most correct, tie-breaker: fastest time
+      // Rule: most correct first, tie-breaker: fastest time
       return attempts.slice().sort((a,b) => {
         if (b.correct !== a.correct) return b.correct - a.correct;
         return a.timeMs - b.timeMs;
@@ -534,54 +554,70 @@
     }
 
     const hsCount = document.getElementById("hsCount");
-    const highscoreTableWrap = document.getElementById("highscoreTableWrap");
+    const hsCols = document.getElementById("hsCols");
 
-    function renderHighscores(){
-      const attempts = sortAttempts(loadAttempts());
-      hsCount.textContent = "Saved attempts: " + attempts.length;
+    function renderModeColumn(modeNumber, attempts){
+      const filtered = attempts.filter(a => a.mode === modeNumber);
+      const sorted = sortAttempts(filtered);
 
-      if (attempts.length === 0){
-        highscoreTableWrap.innerHTML = `<div class="pill">No attempts yet. Finish a mode to record a score.</div>`;
-        return;
-      }
-
-      let rows = "";
-      for (let i = 0; i < attempts.length; i++){
-        const a = attempts[i];
-        rows += `
-          <tr>
-            <td class="mono">${i + 1}</td>
-            <td>${escapeHTML(modeName(a.mode))}</td>
-            <td class="mono">${a.correct} / ${a.total}</td>
-            <td class="mono">${a.percent}%</td>
-            <td class="mono">${formatTime(a.timeMs)}</td>
-            <td class="mono">${escapeHTML(niceDate(a.when))}</td>
-          </tr>
+      let body = "";
+      if (sorted.length === 0){
+        body = `<div class="pill">No attempts yet.</div>`;
+      } else {
+        let rows = "";
+        for (let i = 0; i < sorted.length; i++){
+          const a = sorted[i];
+          rows += `
+            <tr>
+              <td class="mono">${i + 1}</td>
+              <td class="mono">${a.correct}/${a.total}</td>
+              <td class="mono">${a.percent}%</td>
+              <td class="mono">${formatTime(a.timeMs)}</td>
+            </tr>
+          `;
+        }
+        body = `
+          <table>
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Score</th>
+                <th>%</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+          <div class="pill" style="margin-top:10px">Latest: <span class="mono">${escapeHTML(niceDate(sorted[0].when))}</span></div>
         `;
       }
 
-      highscoreTableWrap.innerHTML = `
-        <table>
-          <thead>
-            <tr>
-              <th>Rank</th>
-              <th>Mode</th>
-              <th>Score</th>
-              <th>Percent</th>
-              <th>Time</th>
-              <th>When</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
+      const col = document.createElement("div");
+      col.className = "card";
+      col.innerHTML = `
+        <div class="hd">
+          <h2>${escapeHTML(modeName(modeNumber))}</h2>
+          <span class="pill">Attempts: ${filtered.length}</span>
+        </div>
+        <div class="bd">${body}</div>
       `;
+      return col;
+    }
+
+    function renderHighscores(){
+      const attempts = loadAttempts();
+      hsCount.textContent = "Saved attempts: " + attempts.length;
+
+      hsCols.innerHTML = "";
+      hsCols.appendChild(renderModeColumn(1, attempts));
+      hsCols.appendChild(renderModeColumn(2, attempts));
+      hsCols.appendChild(renderModeColumn(3, attempts));
     }
 
     // ===========
     // QUIZ LOGIC + TIMER
     // ===========
     const MODE = { TYPE_TO_DEF: 1, DEF_TO_TYPE: 2, EXAMPLE_TO_TYPE: 3 };
-
     let mode = null;
 
     let deck = [];
@@ -708,13 +744,13 @@
         const right = document.createElement("div");
         right.className = "answerText";
 
-        // Sentence case for every answer choice
+        // Sentence case for EVERY answer choice (smart capitalization)
         if (mode === MODE.TYPE_TO_DEF){
-          // definition answers (may include *italics*)
-          right.innerHTML = italicizeStars(sentenceCase(choice));
+          // definitions may include *italics*
+          right.innerHTML = italicizeStars(sentenceCaseSmart(choice));
         } else {
-          // type answers
-          right.textContent = sentenceCase(choice);
+          // types
+          right.textContent = sentenceCaseSmart(choice);
         }
 
         btn.appendChild(left);
@@ -861,6 +897,7 @@
     btnNext.addEventListener("click", () => next());
 
     document.getElementById("btnBackToHome").addEventListener("click", () => {
+      // Still only reachable after finishing (results screen)
       mode = null;
       showScreen(screenHome);
     });
